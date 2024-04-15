@@ -6,12 +6,12 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 13:39:39 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/12 19:04:15 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/15 15:11:54 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PIPEX_BONUS_H
-# define PIPEN_BONUS_H
+# define PIPEX_BONUS_H
 
 #include "./libft/libft.h"
 #include <stdlib.h>//free malloc exit
@@ -21,12 +21,13 @@
 #include <sys/wait.h>//waipid
 #include <stdio.h>//perror
 
+
 # define EX_ARGS "e.g.: ./pipex infile cmd1 cmd2 ... cmdn outfile"
 # define EX_HEREDOC_ARGS "e.g.: ./pipex here_doc LIMITER cmd cmd1 file"
 # define ERR_INPUT "Error: invalid number of arguments"
 # define ERR_CMD ": command not found"
-# define EXIT_CMD_NOT_FOUND = 127;
-# define EXIT_FAIL = 1;
+# define EXIT_CMD_NOT_FOUND 127
+
 
 
 typedef struct s_pipex
