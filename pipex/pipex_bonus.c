@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 17:39:43 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/15 18:13:18 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/16 17:44:02 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,12 @@ void free_struct(t_pipex *pipex)
 
 
 
-void print_error(char *name, t_pipex pipex, int err_cmd)
+void print_error(char *name, t_pipex *pipex, int err_cmd)
 {
 	if (ft_putstr_fd(name, 2) == -1)
 	{
 		perror("write error");
-		free_struct(&pipex);
+		free_struct(pipex);
 		exit(1);
 	}
 	if (err_cmd == EXIT_CMD_NOT_FOUND)
@@ -95,19 +95,19 @@ void print_error(char *name, t_pipex pipex, int err_cmd)
 		if (ft_putstr_fd(name, 2) == -1)
 		{
 			perror("write error");
-			free_struct(&pipex);
+			free_struct(pipex);
 			exit(1);
 		}
 		if (ft_putendl_fd(": command not found", 2)== -1)
 		{
 			perror("write error");
-			free_struct(&pipex);
+			free_struct(pipex);
 			exit(1);
 		}
 	}
 	else
 		perror(name);
-	free_struct(&pipex);
+	free_struct(pipex);
 	exit(1);
 }
 void close_fds(t_pipex *pipex)
@@ -115,18 +115,32 @@ void close_fds(t_pipex *pipex)
 	int i;
 
 	i = 0;
-	if (pipex->infile)
-		close(pipex->infile);
-	if (pipex->outfile)
-		close(pipex->outfile);
-	while (i < pipex->pipe_nbr)
+	dprintf(2,"close fd0\n");
+	//if (pipex->infile)
+		//close(pipex->infile);
+	dprintf(2,"close fd2\n");
+	//if (pipex->outfile)
+		//close(pipex->outfile);
+	dprintf(2,"close fd3\n");
+	while (i < pipex->cmd_nbr - 1)
 	{
-		if (close(pipex->pipe_fd[i][0]) == -1)
-			print_error("close error", *pipex, EXIT_FAILURE);
-		if (close(pipex->pipe_fd[i][1]) == -1)
-			print_error("close error", *pipex, EXIT_FAILURE);
+		dprintf(2,"close fd4\n");
+		if (pipex->pipe_fd[i][0])
+		{
+			dprintf(2,"close fd5\n");
+			if (close(pipex->pipe_fd[i][0]) == -1)
+				print_error("close error", pipex, EXIT_FAILURE);
+		}		
+			
+		if (pipex->pipe_fd[i][1])
+		{
+			dprintf(2,"close fd6\n");
+			if (close(pipex->pipe_fd[i][1]) == -1)
+				print_error("close error", pipex, EXIT_FAILURE);
+		}
 		i++;
 	}
+	dprintf(2,"close fd7\n");
 }
 
 
@@ -172,7 +186,7 @@ void error_exit(int argc, char **argv)
 
 
 
-void init_envp(char **envp, t_pipex pipex)
+void init_envp(char **envp, t_pipex *pipex)
 {
 	char **arr;
 	int i;
@@ -183,7 +197,7 @@ void init_envp(char **envp, t_pipex pipex)
 		arr = ft_split("/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", ':');
 		if (arr == NULL)
 			print_error("error malloc", pipex, EXIT_FAILURE);
-		pipex.envp_paths = arr;
+		pipex->envp_paths = arr;
 	}
 	else
 	{
@@ -192,11 +206,11 @@ void init_envp(char **envp, t_pipex pipex)
 		arr = ft_split(envp[i], ':');
 		if (arr == NULL)
 			print_error("error malloc", pipex, EXIT_FAILURE);
-		pipex.envp_paths = arr;
+		pipex->envp_paths = arr;
 	}
 }
 
-void input_f_stdin(t_pipex  pipex, char **argv, int heredoc_fd)//read words from stdinput and save it in .here_doc
+void input_f_stdin(t_pipex  *pipex, char **argv, int heredoc_fd)//read words from stdinput and save it in .here_doc
 {
 	char *line;
 	char *limiter;
@@ -209,7 +223,7 @@ void input_f_stdin(t_pipex  pipex, char **argv, int heredoc_fd)//read words from
 		{
 			free(line);
 			free(limiter);
-			close_fds(&pipex);
+			close_fds(pipex);
 			print_error(".here_doc", pipex, EXIT_FAILURE);
 		}
 		free(line);
@@ -220,143 +234,133 @@ void input_f_stdin(t_pipex  pipex, char **argv, int heredoc_fd)//read words from
 }
 
 
-void get_input(t_pipex  pipex, char **argv)
+void get_input(t_pipex  *pipex, char **argv)
 {
 	int heredoc_fd;
 
 	heredoc_fd = open(".here_doc", O_RDONLY | O_CREAT | O_TRUNC, 0777);
 	if (heredoc_fd == -1)
 	{
-		close_fds(&pipex);
+		close_fds(pipex);
 		print_error(".here_doc", pipex, EXIT_FAILURE);
 	}
 	input_f_stdin(pipex, argv,heredoc_fd);//read words from stdinput and save it in .here_doc
 	if (close(heredoc_fd) == -1)
 	{
-		close_fds(&pipex);
+		close_fds(pipex);
 		print_error(".here_doc", pipex, EXIT_FAILURE);
 	}
-	pipex.infile = open(".here_doc", O_RDONLY, 0777);
-	if (pipex.infile == -1)
+	pipex->infile = open(".here_doc", O_RDONLY, 0777);
+	if (pipex->infile == -1)
 	{
-		close_fds(&pipex);
+		close_fds(pipex);
 		print_error(".here_doc", pipex, EXIT_FAILURE);
 	}
 }
 
-void	get_outfile(char **argv,t_pipex  pipex)
+void	get_outfile(char **argv,t_pipex  *pipex)
 {
-	if (pipex.here_doc == 1)
+	if (pipex->here_doc == 1)
 	{
 		//文件不存在則創建它，並以只寫方式打開，並將新的數據追加到文件的末尾。
-		pipex.outfile = open(argv[pipex.cmd_nbr + 3], O_CREAT| O_WRONLY | O_APPEND, 0777);
-		if (pipex.here_doc == -1)
+		pipex->outfile = open(argv[pipex->cmd_nbr + 3], O_CREAT| O_WRONLY | O_APPEND, 0777);
+		if (pipex->here_doc == -1)
 		{
-			close_fds(&pipex);
+			close_fds(pipex);
 			print_error("close error", pipex, EXIT_FAILURE);
 		}
 	}
 	else
 	{
 		//文件不存在則創建它，並以只寫方式打開，如果文件存在則清空文件的內容
-		pipex.outfile = open(argv[pipex.cmd_nbr + 2], O_CREAT| O_WRONLY | O_TRUNC, 0777);
-		if (pipex.outfile == -1)
+		pipex->outfile = open(argv[pipex->cmd_nbr + 2], O_CREAT| O_WRONLY | O_TRUNC, 0777);
+		if (pipex->outfile == -1)
 		{
-			close_fds(&pipex);
+			close_fds(pipex);
 			print_error("close error", pipex, EXIT_FAILURE);
 		}
 	}
 }
 
 
-void	init_pipex_data(int argc, char **argv,char **envp, t_pipex pipex)
+void	init_pipex_data(int argc, char **argv,char **envp, t_pipex *pipex)
 {
 	printf("init test0\n");
-	pipex.cmd_nbr = argc - 3 - pipex.here_doc;
-	printf("init test1\n");
-	pipex.cmd_arr = NULL;
-	printf("init test2\n");
-	pipex.cmd_path = NULL;
-	printf("init test3\n");
-	int pipe_nbr = pipex.cmd_nbr - 1;
-	printf("init test4\n");
+	pipex->cmd_nbr = argc - 3 - pipex->here_doc;
+	pipex->cmd_arr = NULL;
+	pipex->cmd_path = NULL;
+	//pipe_nbr = pipex->cmd_nbr - 1;
 	init_envp(envp, pipex);
-	printf("init test5\n");
-	pipex.pipe_fd = (int **)malloc(sizeof(int *) * (pipex.cmd_nbr - 1));
-	printf("init test6\n");
-	if (!pipex.pipe_fd)
+	pipex->pipe_fd = (int **)malloc(sizeof(int *) * (pipex->cmd_nbr - 1));
+	if (!pipex->pipe_fd)
 		print_error("malloc error", pipex, EXIT_FAILURE);
-	printf("init test7\n");
-	pipex.pid = (int *)malloc (sizeof(int) * pipex.cmd_nbr);
-	if (!pipex.pid)
+	pipex->pid = (int *)malloc (sizeof(int) * pipex->cmd_nbr);
+	if (!pipex->pid)
 		print_error("malloc error", pipex, EXIT_FAILURE);
-	printf("init test8\n");
-	if (pipex.here_doc == 1)//init infile
+	if (pipex->here_doc == 1)//init infile
 	{
-		printf("init test9\n");
 		get_input(pipex, argv);
-		printf("init test9.5\n");
 	}
 	else
 	{
 		printf("init test10\n");
-		pipex.infile = open(argv[1], O_RDONLY);
-		if (pipex.infile < 0)
+		pipex->infile = open(argv[1], O_RDONLY);
+		if (pipex->infile < 0)
 		{
-			printf("init test11\n");
 			//close_fds(&pipex);
-			printf("init test11.5\n");
+			
 			only_print_error("infile opened failed");
 			//print_error(argv[1], pipex, EXIT_FAILURE);
 		}
 	}
-	printf("init test12\n");
+	
 	get_outfile(argv, pipex);// init outfile  check if need to free sth if fails
+	
 }
 
 
-void create_pipe(t_pipex pipex)
+void create_pipe(t_pipex *pipex)
 {
-	size_t i;
+	int i;
 
 	i = 0;
-	while (i < pipex.cmd_nbr - 1)
+	while (i < pipex->cmd_nbr - 1)
 	{
-		pipex.pipe_fd[i] = (int *)malloc(sizeof(int) * 2);
+		pipex->pipe_fd[i] = (int *)malloc(sizeof(int) * 2);
 		
-		if (pipex.pipe_fd[i] == NULL)
+		if (pipex->pipe_fd[i] == NULL)
 			print_error("malloc error", pipex, EXIT_FAILURE);
 		i++;
 	}
 	i = -1;
-	while (++i < pipex.cmd_nbr - 1)
+	while (++i < pipex->cmd_nbr - 1)
 	{
-		if (pipe(pipex.pipe_fd[i]) == -1)
+		if (pipe(pipex->pipe_fd[i]) == -1)
 			print_error("pipe error", pipex, EXIT_FAILURE);
 	}
 }
 
-char *get_cmd_path(char **envp, t_pipex pipex)
+char *get_cmd_path( t_pipex *pipex)
 {
 	int i;
 	char *str;
 	char *command_path;
 
 	i = 0;
-	while (pipex.envp_paths[i])
+	while (pipex->envp_paths[i])
 	{
-		str = ft_strjoin( pipex.envp_paths[i] , "/"); //handle error
-		command_path = ft_strjoin(str, pipex.cmd_arr[0]);
-		free(str);
+		str = ft_strjoin( pipex->envp_paths[i] , "/"); //handle error
+		command_path = ft_strjoin(str, pipex->cmd_arr[0]);
+		//free(str);
 		if (access(command_path, 0) == 0)
 			return (command_path);
-		free(command_path);
+		//free(command_path);
 		i++;
 	}
 	return (NULL);
 }
 
-void	sub_dup2(int input, int output, t_pipex pipex)
+void	sub_dup2(int input, int output, t_pipex *pipex)
 {
 	if (dup2(input, 0) == -1)
 		print_error("dup2 error", pipex, EXIT_FAILURE);
@@ -366,49 +370,55 @@ void	sub_dup2(int input, int output, t_pipex pipex)
 
 
 
-void child(int i, char **argv, char **envp, t_pipex pipex)
+void child(int i, char **argv, char **envp, t_pipex *pipex)
 {
 	if (i == 0)//1 cmd
 	{
-		sub_dup2(pipex.infile, pipex.pipe_fd[0][1], pipex);
-		pipex.cmd_arr = ft_split(argv[2 + pipex.here_doc], ' ');
+		sub_dup2(pipex->infile, pipex->pipe_fd[0][1], pipex);
+		pipex->cmd_arr = ft_split(argv[2 + pipex->here_doc], ' ');
 	}
-	else if (i == (pipex.cmd_nbr - 1))//last cmd
+	else if (i == (pipex->cmd_nbr - 1))//last cmd 3
 	{
-		sub_dup2(pipex.pipe_fd[i][1], pipex.outfile, pipex);
-		pipex.cmd_arr = ft_split(argv[pipex.cmd_nbr - 2], ' ');
+		sub_dup2(pipex->pipe_fd[i][0], pipex->outfile, pipex);
+		pipex->cmd_arr = ft_split(argv[pipex->cmd_nbr - 2], ' ');
 	}
 	else //middle cmd
 	{
-		sub_dup2(pipex.pipe_fd[i][1], pipex.pipe_fd[i][0], pipex);
-		pipex.cmd_arr = ft_split(argv[i + 2 + pipex.here_doc], ' ');
+		sub_dup2(pipex->pipe_fd[i][0], pipex->pipe_fd[i - 1][1], pipex);
+		pipex->cmd_arr = ft_split(argv[i + 2 + pipex->here_doc], ' ');
 	}
-	if (pipex.cmd_arr == NULL)
+	if (pipex->cmd_arr == NULL)
 		print_error("error malloc", pipex, EXIT_FAILURE);
-	close_fds(&pipex);
-	pipex.cmd_path = get_cmd_path(envp, pipex);// may need go back to free command_path
-	execve(pipex.cmd_path,pipex.cmd_arr,envp);
-	print_error(argv[i + 2 + pipex.here_doc], pipex, EXIT_CMD_NOT_FOUND);//if execve fails this line will run
+	close_fds(pipex);
+	pipex->cmd_path = get_cmd_path( pipex);// may need go back to free command_path
+	execve(pipex->cmd_path,pipex->cmd_arr,envp);
+	print_error(argv[i + 2 + pipex->here_doc], pipex, EXIT_CMD_NOT_FOUND);//if execve fails this line will run
 }  
 
-int ft_pipex(char **argv, char **envp, t_pipex pipex)
+int ft_pipex(char **argv, char **envp, t_pipex *pipex)
 {
 	int status;
 	int i;
 	
 	create_pipe(pipex);
 	i = -1;
-	while(++i < pipex.cmd_nbr)
+	while(++i < pipex->cmd_nbr)
 	{
-		pipex.pid[i] = fork();
-		if ( pipex.pid[i] == 0)
+		dprintf(2,"pipex3\n");
+		pipex->pid[i] = fork();
+		dprintf(2,"pipex4\n");
+		if (pipex->pid[i] == 0)
 			child(i, argv, envp, pipex);
-		if (pipex.pid[i] == -1)
+		if (pipex->pid[i] == -1)
 			print_error("error fork", pipex, EXIT_FAILURE);
 	}
-	close_fds(&pipex);//clsoe fds for parent process
+	dprintf(2,"pipex5\n");
+	close_fds(pipex);//clsoe fds for parent process
+	dprintf(2,"pipex6\n");
+	//waitpid(-1, &status, 0);//for test
 	if (waitpid(-1, &status, 0) == -1)// pid= -1, waitpid() waits for any child process to end.
 		print_error("error wairpid", pipex, EXIT_FAILURE);
+	dprintf(2,"pipex7\n");
 	return (status);
 }
 
@@ -427,10 +437,10 @@ int main(int argc, char **argv, char **envp)
 	t_pipex pipex;
 	int status;
 	
-	printf("test0\n");
+	
 	if (argc < 5)
 		error_exit(argc, argv);
-	printf("test1\n");
+	
 	if (ft_strncmp(argv[1], "here_doc",9) == 0)//ft_check_args()
 	{
 		printf("test2\n");
@@ -443,9 +453,9 @@ int main(int argc, char **argv, char **envp)
 	else
 		pipex.here_doc = 0;
 	printf("test4\n");
-	init_pipex_data(argc, argv, envp, pipex);
+	init_pipex_data(argc, argv, envp, &pipex);
 	printf("test5\n");
-	status = ft_pipex(argv, envp, pipex);
+	status = ft_pipex(argv, envp, &pipex);
 	printf("test6\n");
  	//if (WIFEXTED(status))
 	if (status == 0)
@@ -454,7 +464,7 @@ int main(int argc, char **argv, char **envp)
 		{
 			printf("test7\n");
 			if (unlink(".here_doc") == -1)
-				print_error("error unlink", pipex, EXIT_FAILURE);
+				print_error("error unlink", &pipex, EXIT_FAILURE);
 			printf("test8\n");
 			free_struct(&pipex);
 			//exit(WIFEXTED(status));
