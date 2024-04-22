@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 12:08:56 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/18 13:57:48 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/22 16:10:17 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ void free_arr(char **arr)
 		free(arr[i]);
 		i++;
 	}
-	free(arr);
+	if (arr)
+		free(arr);
 	arr = NULL;
 }
 
@@ -43,6 +44,7 @@ void free_int_arr(int **arr)
 	free(arr);
 	arr = NULL;
 }
+
 
 void free_struct(t_pipex *pipex)
 {
@@ -65,6 +67,7 @@ void free_struct(t_pipex *pipex)
 			pipex->pid = NULL;
 		}
 	}
-	free(pipex);
-	pipex = NULL;	
+	if (pipex)
+		free(pipex);
+	pipex = NULL;
 }

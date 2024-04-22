@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/05 13:39:39 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/19 16:21:57 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/22 21:13:08 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,21 +60,28 @@ typedef struct s_pipex
 void print_error(char *name, t_pipex *pipex, int err_cmd);
 void only_print_error(char *name);
 void error_exit(int argc, char **argv);
+void print_error_badcmd(char *name, t_pipex *pipex, int err_cmd);
+
 
 //  free_bonus.c 
 void free_arr(char **arr);
 void free_struct(t_pipex *pipex);
 void free_int_arr(int **arr);
 
+
 //child
 void close_fds(t_pipex *pipex);
 void	sub_dup2(int input, int output, t_pipex *pipex);
 void child(int i, char **argv, char **envp, t_pipex *pipex);
 char *get_cmd_path( t_pipex *pipex, char **cmd_arr);
+char **get_cmd_arr(char *argv, t_pipex *pipex);
+char	**ft_split_pipex(char *str, char *charset);
 
 //init data
-void init_envp(char **envp, t_pipex *pipex);
+
 void	init_pipex_data(int argc, char **argv,char **envp, t_pipex *pipex);
+void init_envp(char **envp, t_pipex *pipex, char **argv);
+//void init_envp(char **envp, t_pipex *pipex);
 void get_input(t_pipex  *pipex, char **argv);
 void input_f_stdin(t_pipex  *pipex, char **argv, int heredoc_fd);
 

@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/18 17:39:43 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/19 14:58:35 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/22 19:52:21 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,11 +47,8 @@ int ft_pipex(char **argv, char **envp, t_pipex *pipex)
 	while(i < pipex->cmd_nbr)
 	{
 		pipex->pid[i] = fork();
-		//dprintf(2,"pid address: %p\n", (void *)&pipex->pid[i]);
-		  
 		if (pipex->pid[i] == 0)
 		{
-			//dprintf(2, "i in ft_pipex: %d\n", i);
 			child(i, argv, envp, pipex);
 		}
 		if (pipex->pid[i] == -1)
@@ -59,12 +56,6 @@ int ft_pipex(char **argv, char **envp, t_pipex *pipex)
 		i++;
 	}
 	close_fds(pipex);//clsoe fds for parent process
-	//dprintf(2,"fd address: %p\n", &pipex->pipe_fd[0]);
-	//dprintf(2,"fd address: %p\n", &pipex->pipe_fd[1]);
-	//dprintf(2,"fd address: %p\n", &pipex->pipe_fd[2]);
-	//waitpid(-1, &status, 0);//for test
-	//if (waitpid(-1, &status, 0) == -1)// pid= -1, waitpid() waits for any child process to end.
-		//print_error("error wairpid", pipex, EXIT_FAILURE);
 	i = -1;
 	while (++i < pipex->cmd_nbr)
 	{
@@ -109,7 +100,7 @@ int main(int argc, char **argv, char **envp)
 	t_pipex pipex;
 	int status;
 	
-	
+
 	if (argc < 5)
 		error_exit(argc, argv);
 	
@@ -124,12 +115,12 @@ int main(int argc, char **argv, char **envp)
 	}
 	else
 		pipex.here_doc = 0;
-	
+	dprintf(2, "test2\n");
 	init_pipex_data(argc, argv, envp, &pipex);
-	
+	dprintf(2, "test3\n");
 	status = ft_pipex(argv, envp, &pipex);
 	parent_free(&pipex);// free  infile, outfile,  unlink ,  cmd_path[i] , cmd psth , pipe
-	
+	dprintf(2, "test4\n");
 	/*if (WIFEXITED(status))
 	{
 		if (pipex.here_doc)

@@ -6,12 +6,11 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 12:27:18 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/18 17:49:03 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/22 19:37:14 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
-
 
 static int	is_sep(char *str, int i, char *charset)
 {
@@ -157,7 +156,6 @@ void close_fds(t_pipex *pipex)
 		}
 		i++;
 	}
-	//dprintf(2,"close fd7\n");
 }
 
 char *get_cmd_path( t_pipex *pipex, char **cmd_arr)
@@ -167,7 +165,8 @@ char *get_cmd_path( t_pipex *pipex, char **cmd_arr)
 	char *command_path;
 
 	i = 0;
-	while (*pipex->envp_paths)
+	
+	while (pipex->envp_paths != NULL && pipex->envp_paths[i] != NULL)
 	{
 		str = ft_strjoin( pipex->envp_paths[i] , "/"); //handle error
 		command_path = ft_strjoin(str, *cmd_arr);
@@ -179,7 +178,7 @@ char *get_cmd_path( t_pipex *pipex, char **cmd_arr)
 		}
 		if (command_path)	
 			free(command_path);
-		pipex->envp_paths++;
+		i++;
 	}
 	return (NULL);
 }
@@ -218,13 +217,11 @@ char **get_cmd_arr(char *argv, t_pipex *pipex) //awk '{print}' -> cmd_arr0: awk 
 		char **cmd_arr;
 		int i;
 
-		dprintf(2, "argv: %s\n", argv);
 		cmd_arr = ft_split_pipex(argv, " ");
-		dprintf(2, "cmd_arr0: %s\n", cmd_arr[0] );
-		dprintf(2, "cmd_arr1: %s\n", cmd_arr[1] );
+		if (ft_strncmp(cmd_arr[0],"/bin", 4) == 0)
+			cmd_arr[0] = cmd_arr[0] + 5; 
 		if (cmd_arr == NULL)
 			print_error("maloc error", pipex, EXIT_FAILURE);
-		
 		i = 0;
 		while(cmd_arr[i] != NULL)
 		{
@@ -236,10 +233,10 @@ char **get_cmd_arr(char *argv, t_pipex *pipex) //awk '{print}' -> cmd_arr0: awk 
 			}
 			i++;
 		}
-		dprintf(2, "cmd_arr fianl 0: %s\n", cmd_arr[0] );
-		dprintf(2, "cmd_arr final 1: %s\n", cmd_arr[1] );
 	return (cmd_arr);	
 }
+
+
 
 
 void child(int i, char **argv, char **envp, t_pipex *pipex)
@@ -247,25 +244,25 @@ void child(int i, char **argv, char **envp, t_pipex *pipex)
 	if (i == 0)//1 cmd
 	{
 		sub_dup2(pipex->infile, pipex->pipe_fd[0][1], pipex);
-		//pipex->cmd_arr = ft_split(argv[2 + pipex->here_doc], ' ');
 		pipex->cmd_arr = get_cmd_arr(argv[2 + pipex->here_doc], pipex);
 	}
 	else if (i == (pipex->cmd_nbr - 1))//last cmd 3
 	{
 		sub_dup2(pipex->pipe_fd[i - 1][0], pipex->outfile, pipex);
-		pipex->cmd_arr = ft_split(argv[i + 2 + pipex->here_doc], ' ');
+		pipex->cmd_arr = get_cmd_arr(argv[i + 2 + pipex->here_doc], pipex);
 	}
-	else //middle cmd
+	else //middle cmds
 	{
 		sub_dup2(pipex->pipe_fd[i - 1][0], pipex->pipe_fd[i][1], pipex);
-		pipex->cmd_arr = ft_split(argv[i + 2 + pipex->here_doc], ' ');
+		pipex->cmd_arr = get_cmd_arr(argv[i + 2 + pipex->here_doc], pipex);
 	}
 	if (pipex->cmd_arr == NULL)
 		print_error("error malloc", pipex, EXIT_FAILURE);
 	close_fds(pipex);
 	pipex->cmd_path = get_cmd_path( pipex, &pipex->cmd_arr[0]);// may need go back to free command_path
-	execve(pipex->cmd_path,pipex->cmd_arr,envp);
-	print_error(argv[i + 2 + pipex->here_doc], pipex, EXIT_CMD_NOT_FOUND);//if execve fails this line will run
-} 
-
-
+	dprintf(2, "child pipex->cmd_path: %s\n", pipex->cmd_path);
+	dprintf(2, "child pipex->cmd_arr[0]: %s\n", pipex->cmd_arr[0]);
+	if (pipex->cmd_path != NULL)
+		execve(pipex->cmd_path,pipex->cmd_arr,envp);
+	print_error_badcmd(argv[i + 2 + pipex->here_doc], pipex, EXIT_CMD_NOT_FOUND);//if execve fails this line will run
+}
