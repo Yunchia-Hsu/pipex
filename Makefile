@@ -25,7 +25,6 @@ END = \033[0m
 
 # Directory locations
 LIBFT_DIR = ./libft
-
 SRCS_DIR = srcs/
 SRCS_BONUS_DIR = srcs_bonus/
 OBJS_DIR = objs/
@@ -33,6 +32,8 @@ OBJS_BONUS_DIR = objs_bonus/
 
 
 # Source file names for mandatory and bonus parts
+LIBFT_SRC = ${shell find ${LIBFT_DIR} -name '*.c'}
+
 SRC =  pipex.c \
 			free.c \
 			error.c \
@@ -48,14 +49,13 @@ SRCS_BONUS = pipex_bonus.c \
 
 # Object files including paths
 OBJS = ${addprefix ${OBJS_DIR}, ${SRC:.c=.o}}
-#OBJS    = $(SRCS:.c=.o)
 OBJS_BONUS = ${addprefix ${OBJS_BONUS_DIR}, ${SRCS_BONUS:.c=.o}}
 
 LIBFT = make -C ./libft
-
+#LIBFT: make -C ${LIBFT_DIR}
 all: ${NAME}
 
-${NAME}: ${OBJS_DIR} ${OBJS} .base #-s silence not print out all files
+${NAME}: ${OBJS_DIR} ${OBJS} .base ${LIBFT_SRC}#-s silence not print out all files
 	@${MAKE} -s -C ${LIBFT_DIR}   
 	@${CC} -o ${NAME} ${OBJS} -L ${LIBFT_DIR} -lft
 	@echo "${YELLOW} ${NAME} created {mandatory ✅} ${END}"
@@ -88,11 +88,12 @@ ${OBJS_BONUS_DIR}%.o: ${SRCS_BONUS_DIR}%.c
 	@${CC} ${CFLAGS} -c $< -o $@
 
 clean:
-	@rm -f ${OBJS} ${BONUS_OBJS}
-	@${make} -C ${LIBFT_DIR} clean
-	@rm -f .bonus .base
-	@echo "${BLUE} $(OBJS_DIR) directory + object files have been removed ${END}"
-	@echo "${BLUE} ${OBJS_BONUS_DIR} directory + object files have been removed ${END}"
+	@rm -fr ${OBJS_DIR}
+	@rm -fr ${OBJS_BONUS_DIR}
+	@${MAKE} -s -C ${LIBFT_DIR} fclean
+	@rm -f .bonus
+	@rm -f .base
+	@echo "${BLUE} ${OBJS_DIR} ${OBJS_BONUS_DIR} directory + object files have been removed ${END}"
 	@echo "${BLUE} ${LIBFT} and libft object files have been removed ${END}"
  
 fclean: clean
