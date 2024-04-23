@@ -147,11 +147,9 @@ void input_f_stdin(t_pipex  *pipex, char **argv, int heredoc_fd)//read words fro
 	char *limiter;
 
 	line = get_next_line(STDIN_FILENO);// protect line and limiter
-	dprintf(2,"line address1; %p\n", &line); 
-	dprintf(2,"line1; %s\n", line);
-	dprintf(2,"argv[2]; %s\n", argv[2]);
+	
 	limiter = ft_strjoin(argv[2], "\n");
-	dprintf(2,"limiter; %s\n", limiter);
+
 	if (!limiter) 
         print_error("Memory allocation failed", pipex, EXIT_FAILURE);
 	while(line && ft_strncmp(line, limiter, ft_strlen(limiter)) != 0)
