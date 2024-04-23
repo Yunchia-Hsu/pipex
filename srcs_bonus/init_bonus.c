@@ -19,7 +19,6 @@ void init_envp(char **envp, t_pipex *pipex, char **argv)
 	int i;
 	
 	i = 0;
-	dprintf(2, "init_envp0\n");
 	if (envp == NULL || envp[i] == NULL)
 	{	
 		arr = ft_split_pipex("/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", ":");
@@ -29,14 +28,11 @@ void init_envp(char **envp, t_pipex *pipex, char **argv)
 	}
 	else
 	{
-		//dprintf(2, "init_envp3\n");
 		while(envp[i] && (ft_strncmp(envp[i],"PATH=", 5) != 0))
 			i++;
-		//dprintf(2, "envp[i]0: %s\n", envp[i]);
 		if (!envp[i])
 			print_error_badcmd(argv[2 + pipex->here_doc], pipex, EXIT_CMD_NOT_FOUND);
 		arr = ft_split(envp[i], ':');
-		dprintf(2, "init_envp4\n");
 		if (arr == NULL)
 			print_error("error malloc", pipex, EXIT_FAILURE);
 		pipex->envp_paths = arr;
@@ -91,64 +87,6 @@ void get_input(t_pipex  *pipex, char **argv)
 	}
 }
 
-void	init_pipex_data(int argc, char **argv,char **envp, t_pipex *pipex)
-{
-	
-	pipex->cmd_nbr = argc - 3 - pipex->here_doc;
-	pipex->cmd_arr = NULL;
-	pipex->cmd_path = NULL;
-	dprintf(2, "init0\n");
-	init_envp(envp, pipex, argv);
-	//init_envp(envp, pipex);
-	dprintf(2, "init1\n");
-	pipex->pipe_fd = (int **)malloc(sizeof(int *) * (pipex->cmd_nbr));//add one more for null
-	dprintf(2, "init\n");
-	if (!pipex->pipe_fd)
-		print_error("malloc error", pipex, EXIT_FAILURE);
-	dprintf(2, "init2\n");
-	pipex->pid = (int *)malloc (sizeof(int) * (pipex->cmd_nbr));
-	if (pipex->pid == NULL)
-		print_error("malloc error", pipex, EXIT_FAILURE);
-	dprintf(2, "init3\n");
-	if (pipex->here_doc == 1)//init infile
-	{
-		get_input(pipex, argv);
-	}
-	else
-	{
-		pipex->infile = open(argv[1], O_RDONLY);
-		if (pipex->infile < 0)
-		{
-			only_print_error("infile opened failed");
-		}
-	}
-	get_outfile(argv, pipex);// init outfile  check if need to free sth if fails
-}
-
-
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-		char	*new_str;
-	size_t	len;
-	size_t	i;
-	size_t	j;
-
-	len = ft_strlen(s1) + ft_strlen(s2) + 1;
-	new_str = (char *)malloc(sizeof(char) * len);
-	if (new_str == NULL)
-		return (NULL);
-	i = 0;
-	j = 0;
-	while (s1[j])
-		new_str[i++] = s1[j++];
-	j = 0;
-	while (s2[j])
-		new_str[i++] = s2[j++];
-	new_str[i] = '\0';
-	return (new_str);
-}
-
-
 void input_f_stdin(t_pipex  *pipex, char **argv, int heredoc_fd)//read words from stdinput and save it in .here_doc
 {
 	char *line;
@@ -186,5 +124,32 @@ void input_f_stdin(t_pipex  *pipex, char **argv, int heredoc_fd)//read words fro
 	}
 }
 
-
+void	init_pipex_data(int argc, char **argv,char **envp, t_pipex *pipex)
+{
+	
+	pipex->cmd_nbr = argc - 3 - pipex->here_doc;
+	pipex->cmd_arr = NULL;
+	pipex->cmd_path = NULL;
+	init_envp(envp, pipex, argv);
+	pipex->pipe_fd = (int **)malloc(sizeof(int *) * (pipex->cmd_nbr));//add one more for null
+	if (!pipex->pipe_fd)
+		print_error("malloc error", pipex, EXIT_FAILURE);
+	pipex->pid = (int *)malloc (sizeof(int) * (pipex->cmd_nbr));
+	if (pipex->pid == NULL)
+		print_error("malloc error", pipex, EXIT_FAILURE);
+	
+	/*if (pipex->here_doc == 1)//init infile
+	{
+		get_input(pipex, argv);
+	}
+	else
+	{
+		pipex->infile = open(argv[1], O_RDONLY);
+		if (pipex->infile < 0)
+		{
+			only_print_error("infile opened failed");
+		}
+	}
+	get_outfile(argv, pipex);// init outfile  check if need to free sth if fails */
+}
 

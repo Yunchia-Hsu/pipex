@@ -74,26 +74,7 @@ int ft_pipex(char **argv, char **envp, t_pipex *pipex)
 	should behave like:
 	cmd0 << LIMITER | cmd1 >> file
 */
-void	parent_free(t_pipex *pipex)
-{
-	int	i;
 
-	i = 0;
-	if (pipex->infile > 0) 
-		close(pipex->infile);
-    if (pipex->outfile > 0) 
-		close(pipex->outfile);
-	if (pipex->here_doc)
-		unlink(".heredoc_tmp");
-	if (pipex->envp_paths)
-		free_arr(pipex->envp_paths);
-	if (pipex->pipe_fd)
-		free_int_arr(pipex->pipe_fd);
-	if (pipex->pid)
-		free(pipex->pid);
-	pipex->pid = NULL;
-	
-}
 
 int main(int argc, char **argv, char **envp)
 {
@@ -115,22 +96,10 @@ int main(int argc, char **argv, char **envp)
 	}
 	else
 		pipex.here_doc = 0;
-	dprintf(2, "test2\n");
 	init_pipex_data(argc, argv, envp, &pipex);
-	dprintf(2, "test3\n");
 	status = ft_pipex(argv, envp, &pipex);
 	parent_free(&pipex);// free  infile, outfile,  unlink ,  cmd_path[i] , cmd psth , pipe
-	dprintf(2, "test4\n");
-	/*if (WIFEXITED(status))
-	{
-		if (pipex.here_doc)
-		{
-			
-			if (unlink(".here_doc") == -1)
-				print_error("error unlink", &pipex, EXIT_FAILURE);
-			
-			free_struct(&pipex);
-			exit(WEXITSTATUS(status));
-		}*/
+	if (WIFEXITED(status))
+		exit(WEXITSTATUS(status));
     return 0;
 }

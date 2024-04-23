@@ -71,3 +71,23 @@ void free_struct(t_pipex *pipex)
 		free(pipex);
 	pipex = NULL;
 }
+
+void	parent_free(t_pipex *pipex)
+{
+	
+	if (pipex->infile > 0) 
+		close(pipex->infile);
+    if (pipex->outfile > 0) 
+		close(pipex->outfile);
+	if (pipex->here_doc)
+		if (unlink(".here_doc") == -1)
+				print_error(ERR_UNLINK, pipex, EXIT_FAILURE);
+	if (pipex->envp_paths)
+		free_arr(pipex->envp_paths);
+	if (pipex->pipe_fd)
+		free_int_arr(pipex->pipe_fd);
+	if (pipex->pid)
+		free(pipex->pid);
+	pipex->pid = NULL;
+}
+

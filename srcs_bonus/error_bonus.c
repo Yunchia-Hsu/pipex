@@ -12,33 +12,33 @@
 
 #include "pipex_bonus.h"
 
-void print_error(char *name, t_pipex *pipex, int err_cmd)
+void print_error(char *name, t_pipex *pipex, int exit_code)
 {
 	if (ft_putstr_fd(name, 2) == -1)
 	{
-		perror("write error");
+		perror("pipex: write error");
 		free_struct(pipex);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
-	if (err_cmd == EXIT_CMD_NOT_FOUND)
+	if (exit_code == EXIT_CMD_NOT_FOUND)
 	{
 		if (ft_putstr_fd(name, 2) == -1)
 		{
 			perror("write error");
 			free_struct(pipex);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
-		if (ft_putendl_fd(": command not found", 2)== -1)
+		if (ft_putendl_fd("command not found", 2)== -1)
 		{
 			perror("write error");
 			free_struct(pipex);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
 		perror(name);
 	free_struct(pipex);
-	exit(1);
+	exit(exit_code);
 }
 
 
@@ -58,7 +58,7 @@ void error_exit(int argc, char **argv)
 	if (ft_putendl_fd(ERR_INPUT, 2) == -1)
 	{
 		perror("pipex:write error");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	if (argc > 1 && ft_strncmp(argv[1], "here_doc", 9) == 0)
@@ -66,7 +66,7 @@ void error_exit(int argc, char **argv)
 		if (ft_putendl_fd(EX_HEREDOC_ARGS, 2) == -1)
 		{
 			perror("pipex:write error");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
@@ -74,10 +74,10 @@ void error_exit(int argc, char **argv)
 		if (ft_putendl_fd(EX_ARGS, 2) == -1)
 		{
 			perror("pipex:write error");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void free_struct_badcmd(t_pipex *pipex)
@@ -104,30 +104,30 @@ void free_struct_badcmd(t_pipex *pipex)
 	pipex = NULL;
 }
 
-void print_error_badcmd(char *name, t_pipex *pipex, int err_cmd)
+void print_error_badcmd(char *name, t_pipex *pipex, int exit_code)
 {
 	if (ft_putstr_fd("pipex: ", 2) == -1)
 	{
 		perror("pipex: write error");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
-	if (err_cmd == EXIT_CMD_NOT_FOUND)
+	if (exit_code == EXIT_CMD_NOT_FOUND)
 	{
 		if (ft_putstr_fd("command not found: ", 2)== -1)
 		{
-			perror("4write error");
+			perror("write error");
 			free_struct_badcmd(pipex);
-			exit(1);
+			exit(EXIT_CMD_NOT_FOUND);
 		}
 		if (ft_putendl_fd(name, 2) == -1)
-		{
-			perror("2write error");
+		{  
+			perror("write error");
 			free_struct_badcmd(pipex);
-			exit(1);
+			exit(EXIT_CMD_NOT_FOUND);
 		}
 	}
 	else
 		perror(name);
 	free_struct_badcmd(pipex);
-	exit(1);
+	exit(exit_code);
 }
