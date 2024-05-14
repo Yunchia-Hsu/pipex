@@ -6,7 +6,7 @@
 #    By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/15 16:52:08 by yhsu              #+#    #+#              #
-#    Updated: 2024/04/19 16:26:08 by yhsu             ###   ########.fr        #
+#    Updated: 2024/05/14 18:11:15 by yhsu             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,7 +38,7 @@ SRC =  pipex.c \
 			free.c \
 			error.c \
 			init.c \
-			child.c \
+			child.c 
 
 
 SRCS_BONUS = pipex_bonus.c \
