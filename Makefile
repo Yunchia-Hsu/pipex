@@ -38,7 +38,7 @@ SRC =  pipex.c \
 			free.c \
 			error.c \
 			init.c \
-			child.c 
+			child.c \
 
 
 SRCS_BONUS = pipex_bonus.c \
