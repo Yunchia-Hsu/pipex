@@ -6,7 +6,7 @@
 #    By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/15 16:52:08 by yhsu              #+#    #+#              #
-#    Updated: 2024/05/14 18:11:15 by yhsu             ###   ########.fr        #
+#    Updated: 2024/04/26 12:02:14 by yhsu             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,13 +39,14 @@ SRC =  pipex.c \
 			error.c \
 			init.c \
 			child.c \
-
+			utils.c \
 
 SRCS_BONUS = pipex_bonus.c \
 			free_bonus.c \
 			error_bonus.c \
 			init_bonus.c \
 			child_bonus.c \
+			utils_bonus.c \
 
 # Object files including paths
 OBJS = ${addprefix ${OBJS_DIR}, ${SRC:.c=.o}}

@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 10:43:04 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/15 17:50:15 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/05/03 16:38:22 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,11 @@ int	ft_putstr_fd(char *s, int fd)
 	i = 0;
 	if (! s)
 	{
-		if (ft_putstr_fd(NULL, fd) == -1)
+		if (ft_putstr_fd("(null)", fd) == -1)
 			return (-1);
 		return (0);
-	}	
-	while (s[i])
-	{
-		if ( write (fd, &s[i], 1) == -1)
-			return (-1);
-		i++;
 	}
-
+	if (write (fd, s, ft_strlen(s)) == -1)
+		return (-1);
 	return (0);
 }

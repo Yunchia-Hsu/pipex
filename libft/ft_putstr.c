@@ -6,11 +6,21 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 15:12:42 by yhsu              #+#    #+#             */
-/*   Updated: 2023/11/22 19:16:08 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/05/03 16:41:52 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
+
+size_t	ft_strlen(const char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
+}
 
 int	ft_putstr(const char *s)
 {
@@ -23,11 +33,7 @@ int	ft_putstr(const char *s)
 			return (-1);
 		return (6);
 	}
-	while (s[i])
-	{
-		if (write (1, &s[i], 1) == -1)
-			return (-1);
-		i++;
-	}
+	if (write (1, s, ft_strlen(s)) == -1)
+		return (-1);
 	return (i);
 }

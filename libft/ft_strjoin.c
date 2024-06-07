@@ -6,7 +6,7 @@
 /*   By: yhsu <yhsu@hive.student.fi>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/01 13:07:47 by yhsu              #+#    #+#             */
-/*   Updated: 2024/04/18 13:56:03 by yhsu             ###   ########.fr       */
+/*   Updated: 2024/04/26 11:34:49 by yhsu             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 char	*ft_strjoin(char const *s1, char const *s2)
 {
-		char	*new_str;
+	char	*new_str;
 	size_t	len;
 	size_t	i;
 	size_t	j;
